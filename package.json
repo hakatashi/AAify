@@ -1,0 +1,23 @@
+{
+  "name": "AAify",
+  "version": "0.0.0",
+  "description": "Make your texts AA",
+  "main": "app.js",
+  "dependencies": {
+    "uglify-js": "~2.4.15"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hakatashi/AAify.git"
+  },
+  "author": "hakatashi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hakatashi/AAify/issues"
+  },
+  "homepage": "https://github.com/hakatashi/AAify"
+}
