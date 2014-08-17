@@ -63,12 +63,16 @@ Caman('rabbit.png', function () {
 		for (var i = 0; i < size; i++) {
 			if (this.pixelData[i * 4] < 128) {
 				blackSizeBuf++;
+				process.stdout.write('*');
 			} else {
 				if (blackSizeBuf !== 0) {
 					blackSizes.push(blackSizeBuf);
 					blackSizeBuf = 0;
 				}
+				process.stdout.write(' ');
 			}
+
+			if ((i + 1) % width === 0) process.stdout.write('\n');
 		}
 
 		var currentDP = [0];
@@ -107,8 +111,36 @@ Caman('rabbit.png', function () {
 			}
 		}
 
-		console.log(tokens.length);
-		console.log(currentDP[tokens.length]);
-		console.log(currentRoutes[tokens.length]);
+		var routes = currentRoutes[tokens.length];
+
+		var cnt = 0;
+		var pushToken = function () {
+			process.stdout.write(tokens[cnt]);
+			cnt++;
+		}
+
+		for (var i = 0; i < routes[0]; i++) {
+			pushToken();
+		}
+
+		var readingBlack = false;
+		var areaCnt = 0;
+
+		for (var i = 0; i < size; i++) {
+			if (this.pixelData[i * 4] < 128) {
+				if (!readingBlack) {
+					readingBlack = true;
+					for (var j = 0; j < routes[areaCnt + 1]; j++) {
+						pushToken();
+					}
+					areaCnt++;
+				}
+			} else {
+				readingBlack = false;
+				process.stdout.write(' ');
+			}
+
+			if ((i + 1) % width === 0) process.stdout.write('\n');
+		}
 	});
 });
