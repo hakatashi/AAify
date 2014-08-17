@@ -5,6 +5,8 @@ var fs = require('fs');
 var separateLast = new RegExp('[A-Za-z0-9$_]$');
 var separateFirst = new RegExp('^[A-Za-z0-9$_]');
 
+var MARGIN = 1.1;
+
 if (process.argv.length < 3) {
 	console.log('Too few arguments');
 	process.exit();
@@ -46,7 +48,7 @@ Caman('rabbit.png', function () {
 		if (this.pixelData[i * 4] < 128) blackAreaSize++;
 	}
 
-	var resizeRatio = Math.sqrt((tokenAreaSize / 2) / blackAreaSize);
+	var resizeRatio = Math.sqrt((tokenAreaSize / 2) * MARGIN / blackAreaSize);
 	var width = Math.floor(this.width * resizeRatio * 2);
 	var height = Math.floor(this.height * resizeRatio);
 
@@ -92,16 +94,17 @@ Caman('rabbit.png', function () {
 
 			for (var j = 0; j < tokens.length + 1; j++) {
 				var additionalLosses = blackSizes[i];
-				var minimumLosses = previousDP[j] + additionalLosses;
+				var minimumLosses = previousDP[j]
+				                    + additionalLosses * additionalLosses;
 				var minimumRoutes = previousRoutes[j].concat(0);
 
 				for (var k = 1; k <= j; k++) {
 					additionalLosses -= tokens[j - k].length;
 
 					if (minimumLosses > previousDP[j - k]
-					                    + Math.abs(additionalLosses)) {
+					                    + additionalLosses * additionalLosses) {
 						minimumLosses = previousDP[j - k]
-						                + Math.abs(additionalLosses);
+						                + additionalLosses * additionalLosses;
 						minimumRoutes = previousRoutes[j - k].concat(k);
 					}
 				}
@@ -130,9 +133,39 @@ Caman('rabbit.png', function () {
 			if (this.pixelData[i * 4] < 128) {
 				if (!readingBlack) {
 					readingBlack = true;
-					for (var j = 0; j < routes[areaCnt + 1]; j++) {
+
+					if (routes[areaCnt + 1] > 0) {
+						var totalCharLength = 0;
+						for (var j = 0; j < routes[areaCnt + 1]; j++) {
+							totalCharLength += tokens[cnt + j].length;
+						}
+
+						var totalSpaceLength = blackSizes[areaCnt]
+						                       - totalCharLength;
+
 						pushToken();
+
+						if (routes[areaCnt + 1] === 1) {
+							for (var j = 0; j < totalSpaceLength; j++) {
+								process.stdout.write(' ');
+							}
+						} else {
+							for (var j = 0; j < routes[areaCnt + 1] - 1; j++) {
+								var spaces = Math.ceil((totalSpaceLength - j)
+								                       / (routes[areaCnt + 1] - 1));
+
+								for (var k = 0; k < spaces; k++) {
+									process.stdout.write(' ');
+								}
+								pushToken();
+							}
+						}
+					} else {
+						for (var j = 0; j < blackSizes[areaCnt]; j++) {
+							process.stdout.write(' ');
+						}
 					}
+
 					areaCnt++;
 				}
 			} else {
