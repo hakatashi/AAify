@@ -27,7 +27,8 @@ while ((token = tokenizer()).value !== undefined) {
 
 	var previousToken = tokens.slice(-1)[0];
 	if (previousToken !== undefined) {
-		if (previousToken.match(separateLast) && tokenString.match(separateFirst)) {
+		if (previousToken.match(separateLast)
+		    && tokenString.match(separateFirst)) {
 			tokens.push(' ');
 			tokenAreaSize += 1;
 		}
@@ -56,17 +57,58 @@ Caman('rabbit.png', function () {
 
 	this.render(function () {
 		var size = this.pixelData.length / 4;
+		var blackSizes = [];
+		var blackSizeBuf = 0;
 
 		for (var i = 0; i < size; i++) {
 			if (this.pixelData[i * 4] < 128) {
-				process.stdout.write('*');
+				blackSizeBuf++;
 			} else {
-				process.stdout.write(' ');
-			}
-
-			if ((i + 1) % width == 0) {
-				process.stdout.write('\n');
+				if (blackSizeBuf !== 0) {
+					blackSizes.push(blackSizeBuf);
+					blackSizeBuf = 0;
+				}
 			}
 		}
+
+		var currentDP = [0];
+		var currentRoutes = [[0]];
+
+		for (var i = 0; i < tokens.length; i++) {
+			currentDP[i + 1] = currentDP[i] + tokens[i].length;
+			currentRoutes[i + 1] = [i + 1];
+		}
+
+		for (var i = 0; i < blackSizes.length; i++) {
+			var previousDP = currentDP;
+			currentDP = [];
+
+			var previousRoutes = currentRoutes;
+			currentRoutes = [];
+
+			for (var j = 0; j < tokens.length + 1; j++) {
+				var additionalLosses = blackSizes[i];
+				var minimumLosses = previousDP[j] + additionalLosses;
+				var minimumRoutes = previousRoutes[j].concat(0);
+
+				for (var k = 1; k <= j; k++) {
+					additionalLosses -= tokens[j - k].length;
+
+					if (minimumLosses > previousDP[j - k]
+					                    + Math.abs(additionalLosses)) {
+						minimumLosses = previousDP[j - k]
+						                + Math.abs(additionalLosses);
+						minimumRoutes = previousRoutes[j - k].concat(k);
+					}
+				}
+
+				currentDP[j] = minimumLosses;
+				currentRoutes[j] = minimumRoutes;
+			}
+		}
+
+		console.log(tokens.length);
+		console.log(currentDP[tokens.length]);
+		console.log(currentRoutes[tokens.length]);
 	});
 });
