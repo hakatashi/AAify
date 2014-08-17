@@ -29,19 +29,15 @@ while ((token = tokenizer()).value !== undefined) {
 	if (previousToken !== undefined) {
 		if (previousToken.match(separateLast) && tokenString.match(separateFirst)) {
 			tokens.push(' ');
-			minifiedSource += ' ';
 			tokenAreaSize += 1;
 		}
 	}
 
 	tokens.push(tokenString);
 	tokenAreaSize += tokenString.length;
-	minifiedSource += tokenString;
 }
 
 Caman('rabbit.png', function () {
-	var perSide = 50;
-
 	// count black area size
 	var dataSize = this.pixelData.length / 4;
 	var blackAreaSize = 0;
@@ -49,24 +45,26 @@ Caman('rabbit.png', function () {
 		if (this.pixelData[i * 4] < 128) blackAreaSize++;
 	}
 
+	var resizeRatio = Math.sqrt((tokenAreaSize / 2) / blackAreaSize);
+	var width = Math.floor(this.width * resizeRatio * 2);
+	var height = Math.floor(this.height * resizeRatio);
+
 	this.resize({
-		width: perSide * 2,
-		height: perSide
+		width: width,
+		height: height
 	});
 
 	this.render(function () {
 		var size = this.pixelData.length / 4;
 
 		for (var i = 0; i < size; i++) {
-			if (this.pixelData[i * 4] < 50) {
+			if (this.pixelData[i * 4] < 128) {
 				process.stdout.write('*');
-			} else if (this.pixelData[i * 4] < 200) {
-				process.stdout.write('-');
 			} else {
 				process.stdout.write(' ');
 			}
 
-			if ((i + 1) % (perSide * 2) == 0) {
+			if ((i + 1) % width == 0) {
 				process.stdout.write('\n');
 			}
 		}
