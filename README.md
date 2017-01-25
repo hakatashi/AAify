@@ -1,6 +1,8 @@
 AAify
 =====
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/hakatashi/AAify.svg)](https://greenkeeper.io/)
+
 Make texts and sources AA!
 
 # Notion
